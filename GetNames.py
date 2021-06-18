@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import fileinput
@@ -19,15 +18,15 @@ try:
     os.mkdir("output")
     print("Generating output folder...")
 except FileExistsError:
-    print("'output' folder already exists.")
+    print("Output folder already exists.")
 
 print("Contacting website...")
 with urlopen(url) as webpage:
     source = webpage.read().decode()
 
-i = "behindthename.com" in url
+behindthename = "behindthename.com" in url
 
-if i:
+if behindthename:
     depositFileName = url.split("/")
     depositFileName = depositFileName[-1]
     if "masculine" in url:
@@ -60,7 +59,7 @@ else:
 
 print(f"Source HTML deposited at {directory}")
 
-if i:
+if behindthename:
     htmlFile = open(directory)
     soup = BeautifulSoup(htmlFile, 'html.parser')
     findClassNgl = soup.find_all("a", class_="nll")
