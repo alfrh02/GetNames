@@ -6,6 +6,14 @@ import argparse
 import os
 import re
 
+########
+#config#
+########
+
+pageNumberLimit = 6
+# when using behindthename.com, the script will download pages 1-10 (by default) of the given name.
+
+#######
 parser = argparse.ArgumentParser(description="Generate a list of names from behindthename.com.")
 parser.add_argument("URL", type=str, help="A behindthename.com URL link")
 args = parser.parse_args()
@@ -20,11 +28,20 @@ try:
 except FileExistsError:
     print("Output folder already exists.")
 
-print("Contacting website...")
-with urlopen(url) as webpage:
-    source = webpage.read().decode()
-
 behindthename = "behindthename.com" in url
+
+pageNumber = 2
+
+if pageNumberLimit == 2: 
+    print("Contacting website...")
+else:
+    print(f"Contacting website page 1/{pageNumberLimit}")
+def getHTML(url):
+    with urlopen(url) as webpage:
+        global source
+        source = webpage.read().decode()
+
+getHTML(url)
 
 if behindthename:
     depositFileName = url.split("/")
@@ -44,6 +61,7 @@ directory = f"{depositFolder}/{depositFileName}.html"
 
 directoryTxt = f"{depositFolder}/{depositFileName}.txt"
 
+#creating .html file for the source html to be deposited into
 if os.path.exists(directory):
     print("Deposit file already exists.")
 
@@ -52,13 +70,25 @@ if os.path.exists(directory):
     
     depositFile = open(directory, "w")
     depositFile.write(source)
-
+#depositing the source html
 else:
     depositFile = open(directory, "w")
     depositFile.write(source)
 
+printPageLimit = pageNumberLimit - 1
+
+if behindthename:
+    while pageNumber != pageNumberLimit:
+        url = f"{url}/{pageNumber}"
+        print(f"Contacting website page {pageNumber}/{printPageLimit}")
+        getHTML(url)
+        depositFile.write(source)
+        pageNumber = pageNumber + 1
+        
+
 print(f"Source HTML deposited at {directory}")
 
+#parsing the html
 if behindthename:
     htmlFile = open(directory)
     soup = BeautifulSoup(htmlFile, 'html.parser')
